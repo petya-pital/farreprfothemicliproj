@@ -11,13 +11,18 @@ class Event:
     def __init__(self):
         self.header = ""
         self.catInfo = CatalogInfo()
-        self.signalData = None
+        self.signalData = None  # Заменяем self.signalData.timeSeries на self.signalData
 
     @property
     def numberOfChannels(self):
         return self.signalData.shape[0] * Event.NUMBER_OF_COMPONENTS
 
 
+class SignalData:
+    def __init__(self):
+        self.timeSeries = None
+        self.ampl = 200.0
+        self.timeDetected = 0.0
 class Datchik:
     def __init__(self):
         self.Introduction = False
@@ -60,7 +65,8 @@ def init_signal_data_array(number_of_gauges, number_of_samples=0):
     signal_data = np.empty((number_of_gauges, Event.NUMBER_OF_COMPONENTS), dtype=object)
     for m in range(number_of_gauges):
         for l in range(Event.NUMBER_OF_COMPONENTS):
-            signal_data[m, l] = None if number_of_samples == 0 else np.zeros(number_of_samples, dtype=np.float32)
+            signal_data[m, l] = SignalData()  # Инициализируем новый объект SignalData для каждого элемента
+            signal_data[m, l].timeSeries = None if number_of_samples == 0 else np.zeros(number_of_samples, dtype=np.float32)
     return signal_data
 
 
@@ -85,14 +91,16 @@ def try_read(db_data):
         offset = 0
 
         header_json, offset = string_from_bytes_a(data, offset)
-        # print(header_json)
+        print(header_json)
+        print('sss \n')
         db_rec_json, offset = string_from_bytes_a(data, offset)
-
+        #print( db_rec_json)
         seis_rec_json = ""
         if data[offset] == 1:  # if event is processed
             offset += 1
             seis_rec_json, offset = string_from_bytes_a(data, offset)
-
+            print(seis_rec_json)
+            print('sss \n')
         NUMBER_OF_GAUGES = get_number_of_gauges(header_json)
         NUMBER_OF_CHANNELS = NUMBER_OF_GAUGES * Event.NUMBER_OF_COMPONENTS
         sample_length = (len(data) - offset) // (struct.calcsize('h') * NUMBER_OF_CHANNELS)
@@ -102,7 +110,7 @@ def try_read(db_data):
             for i in range(sample_length):
                 value = struct.unpack_from('h', data, offset)[0]
                 g, c = divmod(ch, 3)
-                signal_data[g, c][i] = value
+                signal_data[g, c].timeSeries[i] = value
                 offset += struct.calcsize('h')
 
         event = Event()
