@@ -22,14 +22,26 @@ def load_file_as_byte_array(file_path):
     return byte_array
 f = load_file_as_byte_array("Documents/Событие_30_11_2022__03-18-59_ID173232.event")
 ev = er.try_read(f)
-print(ev.catInfo)
+def has_date_in_header(header_json):
+    return "'date\": \"" in header_json
+def get_date_from_header(header_json):
+    date_start = header_json.find("'date': '") + len("'date': '")
+    date_end = header_json.find("'", date_start)
+    date_str = header_json[date_start:date_end]
+    time_start = header_json.find("'time': '") + len("'time': '")
+    time_end = header_json.find("'", time_start)
+    time_str = header_json[time_start:time_end]
+    datetime_str = f"{date_str} {time_str}"
+    return datetime_str
+print(get_date_from_header(str(ev.catInfo)))
 
+print((str(ev.catInfo)))
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print_hi('PyCharm')
 #plot_number_array(ev.signalData[0,0].timeSeries)
 #signal_data = ev.signalData
-obspyplot.process_event(ev)
+#obspyplot.drawSeismo(ev,-1)
 #print(signal_data)
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
 #number_of_gauges, number_of_components = signal_data.shape
@@ -48,3 +60,11 @@ obspyplot.process_event(ev)
 # Визуализируем данные
 #stream.plot()
 #plt.show()
+#obspyplot.drawSeismo(ev,-1)
+number_of_gauges, number_of_components = ev.signalData.shape
+for i in range(number_of_gauges*number_of_components):
+    a=i//3
+    b=i%3
+    print(ev.signalData[a,b].timeDetected)
+
+obspyplot.drawSeismo(ev,2,2)
