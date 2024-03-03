@@ -44,7 +44,7 @@
 from obspy.core import UTCDateTime
 from obspy.core import Trace, Stream
 import matplotlib.pyplot as plt
-from eventreader import * 
+from eventreader import *
 
     # from obspy.core import UTCDateTime
     # from eventreader import * # Импорт вашего класса Event из основного модуля
@@ -59,10 +59,12 @@ def drawSeismo(event, n=0, m=0):
                 for j in range(number_of_components):
                     data = signal_data[i, j].timeSeries
                     trace = Trace(data=data)
-                    print("Time detected:", signal_data[i, j].timeDetected)  # Отладочная информация
-                    # Получаем абсолютное время начала для каждого трейса, добавляя время обнаружения к event.UTCDate
-                    starttime = UTCDateTime(event.UTCDate) + signal_data[i, j].timeDetected
+                    relative_time = int(event.signalData[i, j].timeDetected)
+                    #print(relative_time)
+                    # Получаем абсолютное время начала для трассы, добавляя relative_time к event.UTCDate
+                    starttime = UTCDateTime(event.UTCDate)  +  relative_time
                     trace.stats.starttime = starttime
+                    print(starttime)
                     trace.stats.sampling_rate = signal_data[i, j].ampl
                     stream = Stream(traces=[trace])
                     stream.plot()
@@ -72,9 +74,9 @@ def drawSeismo(event, n=0, m=0):
             data = signal_data[n, m].timeSeries
             trace = Trace(data=data)
             # Получаем относительное время
-            relative_time = event.signalData[n, m].timeDetected
+            relative_time = int(event.signalData[n, m].timeDetected)
             # Получаем абсолютное время начала для трассы, добавляя relative_time к event.UTCDate
-            starttime = UTCDateTime(event.UTCDate) + relative_time
+            starttime = UTCDateTime(event.UTCDate) + relative_time  #+  relative_time_utc
             trace.stats.starttime = starttime
             trace.stats.sampling_rate = signal_data[n, m].ampl
             stream = Stream(traces=[trace])
